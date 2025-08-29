@@ -6,7 +6,7 @@ This Google Apps Script automates the process of transferring LookML projects be
 
 ## Overview
 
-The script reads LookML project information from the active Google Sheet, fetches project details from a source Looker instance, creates a new project on a target Looker instance, automatically adds an SSH deploy key to the associated GitHub repository, and then deploys the project. It also includes functionality to validate a transferred project on demand.
+The script reads LookML project information from the active Google Sheet, fetches project details from a source Looker instance, creates a new project on a target Looker instance, automatically adds an SSH deploy key to the associated GitHub repository, **configures the LookML models associated with the project**, and then deploys the project. It also includes functionality to validate a transferred project on demand.
 
 ---
 
@@ -19,6 +19,8 @@ The script reads LookML project information from the active Google Sheet, fetche
 * **Real-time Status Updates:** The "Transfer Results" column in your Google Sheet is updated as the transfer progresses, providing visibility into each step.
 
 * **GitHub Integration:** Automatically adds the generated SSH deploy key to your GitHub repository with write access.
+
+* **Model Configuration:** Automatically identifies and creates the associated LookML models in the target Looker instance.
 
 * **Bulk Processing:** Processes multiple projects listed in the Google Sheet.
 
@@ -36,38 +38,37 @@ To get this script up and running, follow these steps:
 
 #### A. Create/Open the Apps Script Project
 
-1. Open your Google Sheet.
+1.  Open your Google Sheet.
 
-2. Go to `Extensions > Apps Script`. This will open the Apps Script editor.
+2.  Go to `Extensions > Apps Script`. This will open the Apps Script editor.
 
-3. Copy and paste the entire provided Apps Script code into the `Code.gs` file (or create a new `.gs` file and paste it there).
+3.  Copy and paste the entire provided Apps Script code into the `Code.gs` file (or create a new `.gs` file and paste it there).
 
 #### B. Set Script Properties (API Keys)
 
 Sensitive information like API keys and base URLs are stored as **Script Properties** for security.
 
-1. In the Apps Script editor, click on the **Project Settings** icon (⚙️) on the left sidebar.
+1.  In the Apps Script editor, click on the **Project Settings** icon (⚙️) on the left sidebar.
 
-2. Scroll down to **Script properties** and click `Add script property`.
+2.  Scroll down to **Script properties** and click `Add script property`.
 
-3. Add the following properties with their corresponding values:
+3.  Add the following properties with their corresponding values:
 
-   * `SOURCE_BASE_URL`: The base URL of your source Looker instance (e.g., `https://source.looker.com`).
+    * `SOURCE_BASE_URL`: The base URL of your source Looker instance (e.g., `https://source.looker.com`).
 
-   * `SOURCE_CLIENT_ID`: The API client ID for your source Looker instance.
+    * `SOURCE_CLIENT_ID`: The API client ID for your source Looker instance.
 
-   * `SOURCE_CLIENT_SECRET`: The API client secret for your source Looker instance.
+    * `SOURCE_CLIENT_SECRET`: The API client secret for your source Looker instance.
 
-   * `TARGET_BASE_URL`: The base URL of your target Looker instance (e.g., `https://target.looker.com`).
+    * `TARGET_BASE_URL`: The base URL of your target Looker instance (e.g., `https://target.looker.com`).
 
-   * `TARGET_CLIENT_ID`: The API client ID for your target Looker instance.
+    * `TARGET_CLIENT_ID`: The API client ID for your target Looker instance.
 
-   * `TARGET_CLIENT_SECRET`: The API client secret for your target Looker instance.
+    * `TARGET_CLIENT_SECRET`: The API client secret for your target Looker instance.
 
-   * `GITHUB_API_KEY`: A **GitHub Personal Access Token** with the `Administration` scope. This is essential for the script to add deploy keys to your repositories.
+    * `GITHUB_API_KEY`: A **GitHub Personal Access Token** with the `repo` scope. This is essential for the script to add deploy keys to your repositories.
 
-4. Click `Save properties`.
-5. Add New Deployment -> Deploy as a Web App
+4.  Click `Save properties`.
 
 ---
 
@@ -101,15 +102,15 @@ The first time you run any function from the script (e.g., by selecting `Looker 
 
 ### 2. Transferring Projects
 
-1. **Open your Google Sheet.**
+1.  **Open your Google Sheet.**
 
-2. Go to the **"Looker Tools"** custom menu that appears in your Google Sheet's menu bar (it might take a few seconds to appear after opening the sheet or saving the script).
+2.  Go to the **"Looker Tools"** custom menu that appears in your Google Sheet's menu bar (it might take a few seconds to appear after opening the sheet or saving the script).
 
-3. Click `Transfer Projects`.
+3.  Click `Transfer Projects`.
 
-4. The script will iterate through each row in your active sheet. If the "Transfer Results" column for a project is empty or says "failed", it will initiate the transfer process for that project.
+4.  The script will iterate through each row in your active sheet. If the "Transfer Results" column for a project is empty or says "failed", it will initiate the transfer process for that project.
 
-5. The "Transfer Results" column will update in real-time with the status of each step (e.g., "Fetching project...", "Creating SSH deploy key...", "Successfully deployed project to production!").
+5.  The "Transfer Results" column will update in real-time with the status of each step (e.g., "Fetching project...", "Creating SSH deploy key...", "**Configuring LookML models...**", "Successfully deployed project to production!").
 
 ---
 
@@ -117,19 +118,19 @@ The first time you run any function from the script (e.g., by selecting `Looker 
 
 After a successful transfer, the "Validation Results" column will show "Ready to Validate". You can then manually trigger a validation:
 
-1. **Select any cell** in the row of the project you wish to validate.
+1.  **Select any cell** in the row of the project you wish to validate.
 
-2. Go to the **"Looker Tools"** custom menu.
+2.  Go to the **"Looker Tools"** custom menu.
 
-3. Click `Validate Selected Project`.
+3.  Click `Validate Selected Project`.
 
-4. The script will call the Looker API's `validate_project` endpoint and update the "Validation Results" cell with either "Validation Succeeded" or "Validation Failed" (along with any error messages).
+4.  The script will call the Looker API's `validate_project` endpoint and update the "Validation Results" cell with either "Validation Succeeded" or "Validation Failed" (along with any error messages).
 
 ---
 
 ## GitHub API Key Permissions
 
-The GitHub Personal Access Token (PAT) stored as `GITHUB_API_KEY` in Script Properties requires the **`Administration`** scope. This permission is necessary for the script to programmatically add deploy keys to your GitHub repositories with write access. If your API key has set expirey make sure to generate a new one and replace in your script when it is required.
+The GitHub Personal Access Token (PAT) stored as `GITHUB_API_KEY` in Script Properties requires the **`repo`** scope. This permission is necessary for the script to programmatically add deploy keys to your GitHub repositories with write access.
 
 ---
 
@@ -150,5 +151,7 @@ The GitHub Personal Access Token (PAT) stored as `GITHUB_API_KEY` in Script Prop
 * **GitHub Deploy Key:** The script automatically adds the deploy key to GitHub with **write access**. Ensure this is the desired level of access for your Looker projects.
 
 * **Assumptions:** The script assumes that the project ID you want to transfer does not already exist on the target Looker instance. If it does, the `create_project` step will fail.
+
+* **Model Configuration:** The script attempts to configure all models associated with the `Looker Project` ID found in the source Looker instance. These models are created in the target Looker instance with `allow_all_db_connections: true`.
 
 * **Environment Variables:** While the prompt referred to "env variables," in Google Apps Script, these are implemented as "Script Properties."
