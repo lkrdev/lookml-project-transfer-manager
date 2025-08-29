@@ -130,7 +130,7 @@ After a successful transfer, the "Validation Results" column will show "Ready to
 
 ## GitHub API Key Permissions
 
-The GitHub Personal Access Token (PAT) stored as `GITHUB_API_KEY` in Script Properties requires the **`repo`** scope. This permission is necessary for the script to programmatically add deploy keys to your GitHub repositories with write access.
+The GitHub Personal Access Token (PAT) stored as `GITHUB_API_KEY` in Script Properties requires the **`Administration`** scope. This permission is necessary for the script to programmatically add deploy keys to your GitHub repositories with write access.
 
 ---
 
