@@ -214,6 +214,31 @@ function transferLookmlProject(params, sourceToken, targetToken, sheet, rowIndex
     const deployUrl = params.targetBaseUrl + '/api/4.0/projects/' + newProject.id + '/deploy_to_production';
     lookerApiCall('post', deployUrl, targetToken);
     updateStatus("Successfully deployed project to production.");
+    
+    // 9. Configure Models
+    updateStatus("Configuring LookML models...");
+    const sourceLookMLModelsUrl = params.sourceBaseUrl + '/api/4.0/lookml_models';
+    const sourceModels = lookerApiCall('get', sourceLookMLModelsUrl, sourceToken);
+    
+    const targetCreateLookMLModelUrl = params.targetBaseUrl + '/api/4.0/lookml_models';
+    let modelsConfiguredCount = 0;
+
+    for (let j = 0; j < sourceModels.length; j++) {
+      const model = sourceModels[j];
+      if (model.project_name === params.projectId) {
+        updateStatus(`Creating model '${model.name}' for project '${params.projectId}' on target...`);
+        const modelPayload = {
+          name: model.name,
+          project_name: params.projectId,
+          allow_all_db_connections: true
+        };
+        lookerApiCall('post', targetCreateLookMLModelUrl, targetToken, modelPayload);
+        modelsConfiguredCount++;
+        updateStatus(`Model '${model.name}' configured successfully.`);
+      }
+    }
+    updateStatus(`Successfully configured ${modelsConfiguredCount} LookML models.`);
+
     updateStatus("LookML project transfer completed successfully!");
     return { status: "success"};
 
